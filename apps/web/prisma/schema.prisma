@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  canceled
+  suspended
+}
+
+enum NewsType {
+  daily
+  monthly_summary
+}
+
+enum NotificationFrequency {
+  realtime
+  daily_digest
+}
+
+model User {
+  id                 String             @id @default(uuid())
+  email              String             @unique
+  displayName        String?
+  passwordHash       String?
+  role               UserRole           @default(USER)
+  subscriptionStatus SubscriptionStatus @default(trialing)
+  trialEndDate       DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  deletedAt          DateTime?
+
+  accounts            Account[]
+  passkeys            Passkey[]
+  subscription        Subscription?
+  notificationSetting NotificationSetting?
+  accessLogs          AccessLog[]
+  adminAuditLogs      AdminAuditLog[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String   @id @default(uuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Passkey {
+  id           String    @id @default(uuid())
+  userId       String
+  credentialId String    @unique
+  publicKey    String
+  counter      BigInt    @default(0)
+  aaguid       String?
+  deviceName   String?
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("passkeys")
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  userId               String             @unique
+  stripeSubscriptionId String?            @unique
+  stripeCustomerId     String?
+  planId               String?
+  status               SubscriptionStatus @default(trialing)
+  trialStartDate       DateTime?
+  trialEndDate         DateTime?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model NewsArticle {
+  id          String   @id @default(uuid())
+  newsDate    DateTime @db.Date
+  type        NewsType
+  aiName      String
+  title       String
+  summary     String
+  ceoInsight  String
+  sourceUrls  Json     @default("[]")
+  publishedAt DateTime
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  accessLogs AccessLog[]
+
+  @@index([newsDate, type])
+  @@index([aiName])
+  @@index([publishedAt(sort: Desc)])
+  @@map("news_articles")
+}
+
+model MonthlyReport {
+  id          String   @id @default(uuid())
+  yearMonth   String   @unique
+  summaryText String
+  keyEvents   Json     @default("[]")
+  ceoInsight  String
+  publishedAt DateTime
+  createdAt   DateTime @default(now())
+
+  @@map("monthly_reports")
+}
+
+model NotificationSetting {
+  userId       String                @id
+  emailEnabled Boolean               @default(true)
+  frequency    NotificationFrequency @default(realtime)
+  updatedAt    DateTime              @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_settings")
+}
+
+model AccessLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  actionType String
+  articleId  String?
+  ipAddress  String?
+  userAgent  String?
+  accessedAt DateTime @default(now())
+
+  user    User?        @relation(fields: [userId], references: [id])
+  article NewsArticle? @relation(fields: [articleId], references: [id])
+
+  @@index([userId, accessedAt(sort: Desc)])
+  @@index([accessedAt(sort: Desc)])
+  @@map("access_logs")
+}
+
+model AdminAuditLog {
+  id           String   @id @default(uuid())
+  adminUserId  String
+  action       String
+  targetUserId String?
+  detail       Json     @default("{}")
+  performedAt  DateTime @default(now())
+
+  adminUser User @relation(fields: [adminUserId], references: [id])
+
+  @@map("admin_audit_logs")
+}
+
+model ApiKey {
+  id          String    @id @default(uuid())
+  name        String
+  keyHash     String    @unique
+  permissions String[]  @default([])
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+
+  @@map("api_keys")
+}
+
+model WebAuthnChallenge {
+  id        String   @id @default(uuid())
+  userId    String?
+  challenge String   @unique
+  type      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+  @@map("webauthn_challenges")
+}

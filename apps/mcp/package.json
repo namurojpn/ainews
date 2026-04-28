@@ -1,0 +1,23 @@
+{
+  "name": "mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:ingest": "tsx watch src/server-ingest.ts",
+    "dev:export": "tsx watch src/server-export.ts",
+    "build": "tsc",
+    "start:ingest": "node dist/server-ingest.js",
+    "start:export": "node dist/server-export.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "@prisma/client": "^6.0.0",
+    "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

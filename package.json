@@ -1,0 +1,11 @@
+{
+  "name": "ainews-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "db:generate": "pnpm --filter web exec prisma generate",
+    "db:migrate": "pnpm --filter web exec prisma migrate dev",
+    "mcp:dev": "pnpm --filter mcp dev"
+  }
+}
