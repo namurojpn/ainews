@@ -10,8 +10,6 @@ export const config = {
 
 const PUBLIC_PATHS = ["/", "/login", "/register"];
 const ADMIN_PREFIX = "/admin";
-const AUTH_PREFIX = "/news|/archive|/settings";
-
 export default auth((req: NextRequest & { auth: unknown }) => {
   const { pathname } = req.nextUrl;
   const session = (req as { auth?: { user?: { role?: string; subscriptionStatus?: string } } }).auth;

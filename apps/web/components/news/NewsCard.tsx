@@ -1,5 +1,3 @@
-import { Badge } from "@/components/ui/badge";
-
 interface Article {
   id: string;
   aiName: string;

@@ -45,7 +45,7 @@ export default function LogsPage() {
     setLoading(false);
   }, [from, to]);
 
-  useEffect(() => { fetchLogs(1); }, []);
+  useEffect(() => { fetchLogs(1); }, [fetchLogs]);
 
   function downloadCSV() {
     const params = new URLSearchParams({ from, to, format: "csv" });

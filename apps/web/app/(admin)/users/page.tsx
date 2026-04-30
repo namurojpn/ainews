@@ -54,7 +54,7 @@ export default function UsersPage() {
     setLoading(false);
   }, [keyword]);
 
-  useEffect(() => { fetchUsers(1); }, []);
+  useEffect(() => { fetchUsers(1); }, [fetchUsers]);
 
   async function suspendUser(userId: string, isSuspended: boolean) {
     if (!confirm(isSuspended ? "このユーザーの停止を解除しますか？" : "このユーザーを停止しますか？")) return;

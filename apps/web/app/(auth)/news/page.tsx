@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { NewsCard } from "@/components/news/NewsCard";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export const revalidate = 600;
 

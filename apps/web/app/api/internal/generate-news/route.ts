@@ -1,28 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGeminiModel } from "@/lib/gemini";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
+import { ResponseSchema, getTodayJST } from "@/lib/news";
 
 export const maxDuration = 60;
-
-const ArticleSchema = z.object({
-  aiName: z.string(),
-  title: z.string(),
-  summary: z.string(),
-  ceoInsight: z.string(),
-  sourceUrls: z.array(z.string()).default([]),
-});
-
-const ResponseSchema = z.object({
-  articles: z.array(ArticleSchema),
-});
-
-function getTodayJST(): Date {
-  const now = new Date();
-  const jst = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
-  jst.setHours(0, 0, 0, 0);
-  return jst;
-}
 
 async function handler(req: NextRequest) {
   const secret =

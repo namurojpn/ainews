@@ -1,6 +1,4 @@
 import { verifyAuthentication } from "@/lib/webauthn";
-import { apiError } from "@/types/api";
-import { signIn } from "@/lib/auth";
 
 export async function POST(req: Request) {
   const { response } = await req.json();
