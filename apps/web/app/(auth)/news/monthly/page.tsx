@@ -81,7 +81,7 @@ export default async function MonthlyPage({ searchParams }: PageProps) {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { value: articleCounts.reduce<number>((s, a) => s + a._count.id, 0), label: "ニュース件数" },
+              { value: articleCounts.reduce((s: number, a: { _count: { id: number } }) => s + a._count.id, 0), label: "ニュース件数" },
               { value: articleCounts.length, label: "主要AI動向" },
               { value: (report.keyEvents as string[]).length, label: "経営示唆数" },
             ].map((s) => (
