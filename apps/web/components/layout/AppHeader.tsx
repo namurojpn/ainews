@@ -76,12 +76,12 @@ export function AppHeader({ userName, isAdmin }: Props) {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem asChild>
-                <Link href="/settings">設定・マイページ</Link>
+              <DropdownMenuItem render={<Link href="/settings" />}>
+                設定・マイページ
               </DropdownMenuItem>
               {isAdmin && (
-                <DropdownMenuItem asChild>
-                  <Link href="/admin/dashboard">管理者ダッシュボード</Link>
+                <DropdownMenuItem render={<Link href="/admin/dashboard" />}>
+                  管理者ダッシュボード
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />

@@ -2,8 +2,6 @@ import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import type Stripe from "stripe";
 
-export const config = { api: { bodyParser: false } };
-
 const STATUS_MAP: Record<string, "active" | "canceled" | "suspended" | "trialing"> = {
   active: "active",
   trialing: "trialing",
@@ -50,12 +48,12 @@ export async function POST(req: Request) {
             stripeSubscriptionId: stripeSub.id,
             stripeCustomerId: session.customer as string,
             status: "active",
-            currentPeriodEnd: new Date(stripeSub.current_period_end * 1000),
+            currentPeriodEnd: new Date(stripeSub.items.data[0].current_period_end * 1000),
           },
           update: {
             stripeSubscriptionId: stripeSub.id,
             status: "active",
-            currentPeriodEnd: new Date(stripeSub.current_period_end * 1000),
+            currentPeriodEnd: new Date(stripeSub.items.data[0].current_period_end * 1000),
           },
         }),
         prisma.user.update({
@@ -79,7 +77,7 @@ export async function POST(req: Request) {
           where: { id: dbSub.id },
           data: {
             status: newStatus,
-            currentPeriodEnd: new Date(sub.current_period_end * 1000),
+            currentPeriodEnd: new Date(sub.items.data[0].current_period_end * 1000),
           },
         }),
         prisma.user.update({

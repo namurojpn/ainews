@@ -7,7 +7,7 @@ import {
 import type {
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
-} from "@simplewebauthn/types";
+} from "@simplewebauthn/server";
 import { prisma } from "@/lib/prisma";
 
 const RP_ID = process.env.WEBAUTHN_RP_ID ?? "localhost";
