@@ -74,6 +74,17 @@ export default async function NewsHomePage({ searchParams }: PageProps) {
 
         <div className="border-t border-slate-200 my-2" />
         <p className="text-xs text-slate-400 font-semibold px-2 mb-1">AIフィルタ</p>
+        <Link
+          href={`/news${selectedDateStr ? `?date=${selectedDateStr}` : ""}`}
+          className={`px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
+            !aiFilter
+              ? "bg-blue-50 text-blue-700 font-semibold"
+              : "text-slate-600 hover:bg-slate-100"
+          }`}
+        >
+          <span className="w-2 h-2 rounded-full inline-block bg-slate-300" />
+          すべて
+        </Link>
         {AI_FILTERS.map((ai) => (
           <Link
             key={ai}
@@ -116,6 +127,36 @@ export default async function NewsHomePage({ searchParams }: PageProps) {
           >
             昨日 {yesterdayStr}
           </Link>
+        </div>
+
+        {/* AI filter chips (mobile) */}
+        <div className="flex gap-2 overflow-x-auto md:hidden pb-0.5 -mx-4 px-4">
+          {(["すべて", ...AI_FILTERS] as const).map((ai) => {
+            const isAll = ai === "すべて";
+            const isActive = isAll ? !aiFilter : aiFilter === ai;
+            const dateParam = selectedDateStr ? `date=${selectedDateStr}&` : "";
+            const href = isAll
+              ? `/news${selectedDateStr ? `?date=${selectedDateStr}` : ""}`
+              : `/news?${dateParam}ai=${encodeURIComponent(ai)}`;
+            const dot =
+              ai === "Claude" ? "bg-purple-500" :
+              ai === "ChatGPT" ? "bg-emerald-500" :
+              ai === "Gemini" ? "bg-amber-500" : null;
+            return (
+              <Link
+                key={ai}
+                href={href}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  isActive
+                    ? "bg-blue-700 text-white border-blue-700"
+                    : "bg-white text-slate-600 border-slate-200"
+                }`}
+              >
+                {dot && <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />}
+                {ai}
+              </Link>
+            );
+          })}
         </div>
 
         {articles.length === 0 ? (
