@@ -24,14 +24,14 @@ export async function GET() {
     prisma.user.count({ where: { subscriptionStatus: "active", deletedAt: null } }),
     prisma.user.count({ where: { subscriptionStatus: "trialing", deletedAt: null } }),
     prisma.newsArticle.count(),
-    prisma.accessLog.findMany({
-      where: { accessedAt: { gte: startOfDay }, userId: { not: null } },
-      distinct: ["userId"],
-    }).then((r) => r.length),
-    prisma.accessLog.findMany({
-      where: { accessedAt: { gte: startOfMonth }, userId: { not: null } },
-      distinct: ["userId"],
-    }).then((r) => r.length),
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(DISTINCT "userId") FROM access_logs
+      WHERE "accessedAt" >= ${startOfDay} AND "userId" IS NOT NULL
+    `.then((r) => Number(r[0]?.count ?? 0)),
+    prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(DISTINCT "userId") FROM access_logs
+      WHERE "accessedAt" >= ${startOfMonth} AND "userId" IS NOT NULL
+    `.then((r) => Number(r[0]?.count ?? 0)),
     prisma.user.findMany({
       where: { deletedAt: null },
       orderBy: { createdAt: "desc" },

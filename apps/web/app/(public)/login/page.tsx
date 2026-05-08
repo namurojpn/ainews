@@ -43,11 +43,10 @@ function LoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ response: credential }),
       });
-      const { email: verifiedEmail } = await verRes.json();
+      const { token } = await verRes.json();
 
       const result = await signIn("credentials", {
-        email: verifiedEmail,
-        password: "__passkey__",
+        passkeyToken: token,
         redirect: false,
       });
       if (result?.error) throw new Error("パスキー認証後のサインインに失敗しました");

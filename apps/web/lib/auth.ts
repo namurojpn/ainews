@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
+import { redis } from "@/lib/redis";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import type { SubscriptionStatus, UserRole } from "@prisma/client";
@@ -37,6 +38,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        // パスキー認証後の one-time トークン検証パス
+        if (credentials && "passkeyToken" in credentials) {
+          const token = credentials.passkeyToken as string;
+          const email = await redis.getdel(`passkey:token:${token}`);
+          if (!email || typeof email !== "string") return null;
+          const user = await prisma.user.findUnique({
+            where: { email, deletedAt: null },
+          });
+          if (!user) return null;
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.displayName,
+            role: user.role,
+            subscriptionStatus: user.subscriptionStatus,
+            trialEndDate: user.trialEndDate?.toISOString() ?? null,
+          };
+        }
+
+        // 通常のメール/パスワード認証パス
         const parsed = z
           .object({ email: z.string().email(), password: z.string().min(8) })
           .safeParse(credentials);

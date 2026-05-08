@@ -45,13 +45,10 @@ const VALID_GEMINI_RESPONSE = JSON.stringify({
   ],
 });
 
-function makeRequest(method: "GET" | "POST", secret?: string, useHeader = false) {
-  const url = secret && !useHeader
-    ? `http://localhost/api/internal/generate-news?secret=${secret}`
-    : "http://localhost/api/internal/generate-news";
+function makeRequest(method: "GET" | "POST", secret?: string) {
   const headers: Record<string, string> = {};
-  if (secret && useHeader) headers["x-cron-secret"] = secret;
-  return new Request(url, { method, headers });
+  if (secret) headers["x-cron-secret"] = secret;
+  return new Request("http://localhost/api/internal/generate-news", { method, headers });
 }
 
 describe("GET|POST /api/internal/generate-news — CRON 認証", () => {
@@ -70,7 +67,7 @@ describe("GET|POST /api/internal/generate-news — CRON 認証", () => {
     expect(res.status).toBe(401);
   });
 
-  it("クエリパラメータでシークレット認証できる", async () => {
+  it("x-cron-secret ヘッダーで認証できる (GET)", async () => {
     const model = { generateContent: vi.fn().mockResolvedValue({ response: { text: () => VALID_GEMINI_RESPONSE } }) };
     mockGetModel.mockReturnValue(model);
     mp.newsArticle.deleteMany.mockResolvedValue({ count: 0 });
@@ -80,13 +77,13 @@ describe("GET|POST /api/internal/generate-news — CRON 認証", () => {
     expect(res.status).toBe(200);
   });
 
-  it("ヘッダーでシークレット認証できる", async () => {
+  it("x-cron-secret ヘッダーで認証できる (POST)", async () => {
     const model = { generateContent: vi.fn().mockResolvedValue({ response: { text: () => VALID_GEMINI_RESPONSE } }) };
     mockGetModel.mockReturnValue(model);
     mp.newsArticle.deleteMany.mockResolvedValue({ count: 0 });
     mp.newsArticle.createMany.mockResolvedValue({ count: 2 });
 
-    const res = await POST(makeRequest("POST", "test-cron-secret", true));
+    const res = await POST(makeRequest("POST", "test-cron-secret"));
     expect(res.status).toBe(200);
   });
 });

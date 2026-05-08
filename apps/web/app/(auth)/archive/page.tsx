@@ -68,10 +68,21 @@ export default function ArchivePage() {
     setLoading(false);
   }
 
-  function highlightKeyword(text: string) {
-    if (!keyword) return text;
-    const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
-    return text.replace(regex, '<mark class="bg-yellow-100 text-yellow-800">$1</mark>');
+  function HighlightText({ text }: { text: string }) {
+    if (!keyword) return <>{text}</>;
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+    return (
+      <>
+        {parts.map((part, i) =>
+          part.toLowerCase() === keyword.toLowerCase() ? (
+            <mark key={i} className="bg-yellow-100 text-yellow-800">{part}</mark>
+          ) : (
+            part
+          )
+        )}
+      </>
+    );
   }
 
   return (
@@ -86,6 +97,7 @@ export default function ArchivePage() {
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="例: マルチモーダル、GPT-5..."
               onKeyDown={(e) => e.key === "Enter" && search()}
+              maxLength={100}
               className="pr-10"
             />
             <button
@@ -187,14 +199,12 @@ export default function ArchivePage() {
                       {new Date(a.newsDate).toLocaleDateString("ja-JP")}
                     </span>
                   </div>
-                  <p
-                    className="text-sm font-semibold text-slate-900 mb-1"
-                    dangerouslySetInnerHTML={{ __html: highlightKeyword(a.title) }}
-                  />
-                  <p
-                    className="text-xs text-slate-500 leading-relaxed line-clamp-2"
-                    dangerouslySetInnerHTML={{ __html: highlightKeyword(a.summary) }}
-                  />
+                  <p className="text-sm font-semibold text-slate-900 mb-1">
+                    <HighlightText text={a.title} />
+                  </p>
+                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
+                    <HighlightText text={a.summary} />
+                  </p>
                 </div>
               ))
             )}
